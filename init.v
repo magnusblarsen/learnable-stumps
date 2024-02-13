@@ -19,6 +19,7 @@ Import numFieldTopology.Exports.
 
 
 Local Open Scope ring_scope.
+Local Open Scope classical_set_scope.
 
 Section decision_stump.
 Context d (T : measurableType d) {R : realType} (P : probability T R) (X : {RV P >-> R}) (t_hat : R).
@@ -30,7 +31,9 @@ Definition label (d : R) := fun x => x <= d.
 Definition llist (l : seq R) := 
   map (fun x => (x, label t_hat x)) l.
 
-Definition error h := P [set t : T | h (X t) != label t_hat (X t)].
+Definition error (h: R -> bool) := P [set t : T | h (X t) != label t_hat (X t)].
+
+Lemma n_value : 1 - (1 - epsilon)^+n >= 1 - delta -> n >= ln delta / ln (1 - epsilon).
 
 
 Definition algo (l : seq (R * bool)) :=
