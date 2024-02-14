@@ -33,13 +33,13 @@ Definition llist (l : seq R) :=
 
 Definition error (h: R -> bool) := P [set t : T | h (X t) != label t_hat (X t)].
 
-Lemma n_value : 1 - (1 - epsilon)^n >= 1 - delta -> (n%R) >= ln delta / ln (1 - epsilon).
+Lemma n_value : 1 - (1 - epsilon)^n >= 1 - delta -> (n%:R) >= ln delta / ln (1 - epsilon).
 
 
 Definition algo (l : seq (R * bool)) :=
   let t := \big[maxr/0]_(i <- l | i.2) i.1 in
   label t.
 
-Definition pac_learnable (epsilon delta : R) := 
+Definition pac_learnable (epsilon delta : R) := false.
 
 End decision_stump.
