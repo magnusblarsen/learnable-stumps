@@ -23,6 +23,8 @@ Local Open Scope classical_set_scope.
 
 Section decision_stump.
 Context d (T : measurableType d) {R : realType} (P : probability T R) (X : {RV P >-> R}) (t_hat : R) (delta : R) (epsilon : R)(n : nat).
+Hypotheses (epsilon_01 : 0 <= epsilon < 1) (delta_01 : 0 < delta < 1).
+
   
 
 
@@ -32,8 +34,22 @@ Definition llist (l : seq R) :=
   map (fun x => (x, label t_hat x)) l.
 
 Definition error (h: R -> bool) := P [set t : T | h (X t) != label t_hat (X t)].
+  
+Lemma n_value : 1 - (1 - epsilon)^+(n%:R) >= 1 - delta -> (n%:R) >= ln delta / ln (1 - epsilon).
+Proof.
+  rewrite -opprB opprD opprK -lerBrDr addrAC subrr add0r lerNr opprK.
+  rewrite -ler_ln; last 2 first.
+  rewrite posrE exprn_gt0 // subr_gt0 (andP epsilon_01).2 //. 
+  rewrite posrE (andP delta_01).1 //.
+  rewrite lnXn; last 1 first. 
+  rewrite subr_gt0 (andP epsilon_01).2 //.
+  Admitted. 
 
-Lemma n_value : 1 - (1 - epsilon)^n >= 1 - delta -> (n%:R) >= ln delta / ln (1 - epsilon).
+
+
+
+
+(* rewrite mulrC. rewrite ler_ndivrMr. *) 
 
 
 Definition algo (l : seq (R * bool)) :=
