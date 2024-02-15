@@ -35,15 +35,17 @@ Definition llist (l : seq R) :=
 
 Definition error (h: R -> bool) := P [set t : T | h (X t) != label t_hat (X t)].
   
-Lemma n_value : 1 - (1 - epsilon)^+(n%:R) >= 1 - delta -> (n%:R) >= ln delta / ln (1 - epsilon).
+Lemma n_value : 1 - (1 - epsilon)^+n >= 1 - delta -> (n%:R) >= ln delta / ln (1 - epsilon).
 Proof.
-  rewrite -opprB opprD opprK -lerBrDr addrAC subrr add0r lerNr opprK.
-  rewrite -ler_ln; last 2 first.
-  rewrite posrE exprn_gt0 // subr_gt0 (andP epsilon_01).2 //. 
-  rewrite posrE (andP delta_01).1 //.
-  rewrite lnXn; last 1 first. 
-  rewrite subr_gt0 (andP epsilon_01).2 //.
-  Admitted. 
+rewrite -opprB opprD opprK -lerBrDr addrAC subrr add0r lerNr opprK.
+rewrite -ler_ln; last 2 first.
+- by rewrite posrE exprn_gt0 // subr_gt0 (andP epsilon_01).2.
+- by rewrite posrE (andP delta_01).1.
+rewrite lnXn; last first.
+  by rewrite subr_gt0 (andP epsilon_01).2.
+rewrite -ler_ndivrMr.
+  by rewrite invrK mulrC mulr_natr.
+Admitted.
 
 
 
