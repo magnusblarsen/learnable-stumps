@@ -21,6 +21,15 @@ Import numFieldTopology.Exports.
 Local Open Scope ring_scope.
 Local Open Scope classical_set_scope.
 
+Section move_to_analysis.
+Context {R : realType}.
+
+Lemma ln_lt0 (x : R) : 0 < x < 1 -> ln x < 0.
+Proof.
+(* by move=> x_gt1; rewrite -ltr_expR expR0 lnK // qualifE/= (lt_trans _ x_gt1).*)
+Admitted.
+End move_to_analysis.
+
 Section decision_stump.
 Context d (T : measurableType d) {R : realType} (P : probability T R) (X : {RV P >-> R}) (t_hat : R) (delta : R) (epsilon : R)(n : nat).
 Hypotheses (epsilon_01 : 0 < epsilon < 1) (delta_01 : 0 < delta < 1).
@@ -35,7 +44,7 @@ Definition llist (l : seq R) :=
 
 Definition error (h: R -> bool) := P [set t : T | h (X t) != label t_hat (X t)].
 
-  
+
 Lemma n_value : 1 - (1 - epsilon)^+n >= 1 - delta -> (n%:R) >= ln delta / ln (1 - epsilon).
 Proof.
 rewrite -opprB opprD opprK -lerBrDr addrAC subrr add0r lerNr opprK.
