@@ -55,7 +55,7 @@ rewrite lnXn; last first.
   by rewrite subr_gt0 (andP epsilon_01).2.
 rewrite -ler_ndivrMr.
 - by rewrite invrK mulrC mulr_natr.
-- rewrite invr_lt0. rewrite -oppr_gt0. 
+- rewrite invr_lt0.  rewrite ln_lt0 //.
 
 
 
