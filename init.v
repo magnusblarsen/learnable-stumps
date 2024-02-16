@@ -58,11 +58,11 @@ rewrite lnXn; last first.
   by rewrite subr_gt0 (andP epsilon_01).2.
 rewrite -ler_ndivrMr.
 - by rewrite invrK mulrC mulr_natr.
-- rewrite invr_lt0. rewrite -ln1. rewrite ltr_ln. 
-
-(* rewrite ln_lt0 //.
-
-rewrite mulrC. rewrite ler_ndivrMr. *) 
+rewrite invr_lt0 -ln1 ltr_ln. 
+- by rewrite gtrBl (andP epsilon_01).1.
+- rewrite posrE subr_gt0 (andP epsilon_01).2 //.
+by rewrite posrE ltr01.
+Qed.
 
 
 Definition algo (l : seq (R * bool)) :=
