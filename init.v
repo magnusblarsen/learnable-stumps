@@ -26,7 +26,7 @@ Context {R : realType}.
 
 Lemma ln_lt0 (x : R) : 0 < x < 1 -> ln x < 0.
 Proof.
-  move=> x_gt1;
+  move=> x_gt1.
   rewrite -ltr_expR expR0 lnK. 
   rewrite (andP x_gt1).2 //. rewrite posrE (andP x_gt1).1 //.
 Qed.
@@ -58,13 +58,9 @@ rewrite lnXn; last first.
   by rewrite subr_gt0 (andP epsilon_01).2.
 rewrite -ler_ndivrMr.
 - by rewrite invrK mulrC mulr_natr.
-- rewrite invr_lt0. rewrite ln_lt0 //. 
+- rewrite invr_lt0. rewrite -ln1. rewrite ltr_ln. 
 
-
-
-(* 
-ln_le0. 
-ln_gt0: forall [R : realType] [x : R], 1 < x -> 0 < ln x
+(* rewrite ln_lt0 //.
 
 rewrite mulrC. rewrite ler_ndivrMr. *) 
 
