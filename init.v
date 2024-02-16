@@ -26,9 +26,7 @@ Context {R : realType}.
 
 Lemma ln_lt0 (x : R) : 0 < x < 1 -> ln x < 0.
 Proof.
-  move=> x_gt1.
-  rewrite -ltr_expR expR0 lnK. 
-  rewrite (andP x_gt1).2 //. rewrite posrE (andP x_gt1).1 //.
+by move=> /andP[x_gt0 x_lt1]; rewrite -ltr_expR expR0 lnK.
 Qed.
 (* by move=> x_gt1; rewrite -ltr_expR expR0 lnK // qualifE/= (lt_trans _ x_gt1). *)
 End move_to_analysis.
