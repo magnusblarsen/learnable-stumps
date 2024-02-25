@@ -8,6 +8,7 @@ From mathcomp Require Import topology derive normedtype sequences
  exp measure lebesgue_measure lebesgue_integral probability hoelder.
 
 
+
 Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
@@ -16,6 +17,7 @@ Unset Printing Implicit Defensive.
 Import Num.Def Num.Theory GRing.Theory.
 Import Order.TTheory.
 Import numFieldTopology.Exports.
+Import algebra.matrix algebra.mxpoly.
 
 
 Local Open Scope ring_scope.
@@ -64,6 +66,14 @@ Qed.
 Definition algo (l : seq (R * bool)) :=
   let t := \big[maxr/0]_(i <- l | i.2) i.1 in
   label t.
+
+Definition test :=
+  let row_vector : 'rV_n := \row_(j < n) Expr(j) a in
+    seq_of_rV row_vector.
+
+Definition test1 :=
+  let row_vector : 'rV_n := \row_(n) Expr(j \in X) a in
+    seq_of_rV row_vector.
 
 Definition pac_learnable (epsilon delta : R) := false.
 
