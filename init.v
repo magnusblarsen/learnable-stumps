@@ -25,14 +25,12 @@ Section move_to_analysis.
 Context {R : realType}.
 
 Lemma ln_lt0 (x : R) : 0 < x < 1 -> ln x < 0.
-Proof.
-by move=> /andP[x_gt0 x_lt1]; rewrite -ltr_expR expR0 lnK.
-Qed.
+Proof. by move=> /andP[x_gt0 x_lt1]; rewrite -ltr_expR expR0 lnK. Qed.
 (* by move=> x_gt1; rewrite -ltr_expR expR0 lnK // qualifE/= (lt_trans _ x_gt1). *)
 End move_to_analysis.
 
 Section decision_stump.
-Context d (T : measurableType d) {R : realType} (P : probability T R) (X : {RV P >-> R}) (t_hat : R) (delta : R) (epsilon : R)(n : nat).
+Context d (T : measurableType d) {R : realType} (P : probability T R) (X : {RV P >-> R}) (t_hat : R) (delta : R) (epsilon : R) (n : nat).
 Hypotheses (epsilon_01 : 0 < epsilon < 1) (delta_01 : 0 < delta < 1).
 
   
