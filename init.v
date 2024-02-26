@@ -17,8 +17,7 @@ Unset Printing Implicit Defensive.
 Import Num.Def Num.Theory GRing.Theory.
 Import Order.TTheory.
 Import numFieldTopology.Exports.
-Import algebra.matrix algebra.mxpoly.
-
+Import MatrixFormula.
 
 Local Open Scope ring_scope.
 Local Open Scope classical_set_scope.
@@ -67,9 +66,20 @@ Definition algo (l : seq (R * bool)) :=
   let t := \big[maxr/0]_(i <- l | i.2) i.1 in
   label t.
 
+Definition seq_of_RV := {RV P >-> R} ^nat.
+Definition Xn : seq_of_RV := [sequence X]_n.
+
+Variable t0 : R.
+Definition I (X : {RV P >-> R}) := [set x | t0 <= X x <= t_hat ].
+Definition prob_of_X := P (I X).
+Hypothesis (Peps : prob_of_X = epsilon%:E).
+
+Definition prob_of_seq := \prod_(i < n) P (I (X i)).
+Definition test := [seq X | 
+
 Definition test :=
-  let row_vector : 'rV_n := \row_(j < n) Expr(j) a in
-    seq_of_rV row_vector.
+  let row_vector : 'rV_n := \row_(j < n) X in
+    @seq_of_rV R _ row_vector.
 
 Definition test1 :=
   let row_vector : 'rV_n := \row_(n) Expr(j \in X) a in
