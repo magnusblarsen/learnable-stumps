@@ -27,11 +27,10 @@ Context {R : realType}.
 
 Lemma ln_lt0 (x : R) : 0 < x < 1 -> ln x < 0.
 Proof. by move=> /andP[x_gt0 x_lt1]; rewrite -ltr_expR expR0 lnK. Qed.
-(* by move=> x_gt1; rewrite -ltr_expR expR0 lnK // qualifE/= (lt_trans _ x_gt1). *)
 End move_to_analysis.
 
 Section decision_stump.
-Context d (T : measurableType d) {R : realType} (P : probability T R) (X : {RV P >-> R}) (t_hat : R) (delta : R) (epsilon : R) (n : nat).
+Context d (T : measurableType d) {R : realType} (P : probability T R) (X : {RV P >-> R}) (t : R) (delta : R) (epsilon : R) (n : nat).
 Hypotheses (epsilon_01 : 0 < epsilon < 1) (delta_01 : 0 < delta < 1).
 
   
@@ -40,9 +39,9 @@ Hypotheses (epsilon_01 : 0 < epsilon < 1) (delta_01 : 0 < delta < 1).
 Definition label (d : R) := fun x => x <= d.
 
 Definition llist (l : seq R) := 
-  map (fun x => (x, label t_hat x)) l.
+  map (fun x => (x, label t x)) l.
 
-Definition error (h: R -> bool) := P [set t : T | h (X t) != label t_hat (X t)].
+Definition error (h: R -> bool) := P [set x : T | h (X x) != label t (X x)].
 
 
 Lemma n_value : 1 - (1 - epsilon)^+n >= 1 - delta -> (n%:R) >= ln delta / ln (1 - epsilon).
@@ -70,15 +69,18 @@ Definition seq_of_RV := {RV P >-> R} ^nat.
 Definition Xn : seq_of_RV := [sequence X]_n.
 
 Variable t0 : R.
-Definition I (X : {RV P >-> R}) := [set x | t0 <= X x <= t_hat ].
+Definition I (X : {RV P >-> R}) := [set x | t0 <= X x <= t ].
+
 Definition prob_of_X := P (I X).
-Hypothesis (Peps : prob_of_X = epsilon%:E).
+
+Hypothesis (PXeps : prob_of_X = epsilon%:E).
 
 Definition prob_of_seq := \prod_(i < n) P (I (X i)).
 
 Definition test :=
   let row_vector : 'rV_n := \row_(j < n) X in
     @seq_of_rV R _ row_vector.
+
 
 Definition pac_learnable (epsilon delta : R) := (n%:R) >= ln delta / ln (1 - epsilon) -> P (error (algo (llist ((* seq of n length *)))) <= epsilon) >= 1 - delta.
 
