@@ -75,12 +75,15 @@ Definition prob_of_X := P (I X).
 
 Hypothesis (PXeps : prob_of_X = epsilon%:E).
 
+
 Definition prob_of_seq := \prod_(i < n) P (I (X i)).
 
 Definition test :=
   let row_vector : 'rV_n := \row_(j < n) X in
     @seq_of_rV R _ row_vector.
 
+Lemma prob_xt_leq_eps (training_exs : seq (R * bool)) : P (x <= t) <= epsilon -> error (algo training_exs) <= epsilon. (* TODO: where do i get x and training_exs? *)
+Lemma prob_xt_gt_eps : P (x <= t) > epsilon -> 1 - (1 - epsilon)^+n >= 1 - delta.
 
 Definition pac_learnable (epsilon delta : R) := (n%:R) >= ln delta / ln (1 - epsilon) -> P (error (algo (llist ((* seq of n length *)))) <= epsilon) >= 1 - delta.
 
