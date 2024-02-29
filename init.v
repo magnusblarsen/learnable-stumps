@@ -75,16 +75,11 @@ Definition prob_of_X := P (I X).
 Hypothesis (Peps : prob_of_X = epsilon%:E).
 
 Definition prob_of_seq := \prod_(i < n) P (I (X i)).
-Definition test := [seq X | 
 
 Definition test :=
   let row_vector : 'rV_n := \row_(j < n) X in
     @seq_of_rV R _ row_vector.
 
-Definition test1 :=
-  let row_vector : 'rV_n := \row_(n) Expr(j \in X) a in
-    seq_of_rV row_vector.
-
-Definition pac_learnable (epsilon delta : R) := false.
+Definition pac_learnable (epsilon delta : R) := (n%:R) >= ln delta / ln (1 - epsilon) -> P (error (algo (llist ((* seq of n length *)))) <= epsilon) >= 1 - delta.
 
 End decision_stump.
