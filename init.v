@@ -5,8 +5,32 @@ From mathcomp Require Import lra.
 From mathcomp Require Import all_classical.
 From mathcomp Require Import reals ereal signed.
 From mathcomp Require Import topology derive normedtype sequences
- exp measure lebesgue_measure lebesgue_integral probability hoelder.
+ exp measure lebesgue_measure lebesgue_integral probability hoelder fintype.
 
+Notation "\prod_ ( i <- r | P ) F" :=
+  (\big[*%E/1%:E]_(i <- r | P%B) F%E) : ereal_scope.
+Notation "\prod_ ( i <- r ) F" :=
+  (\big[*%E/1%:E]_(i <- r) F%E) : ereal_scope.
+Notation "\prod_ ( m <= i < n | P ) F" :=
+  (\big[*%E/1%:E]_(m <= i < n | P%B) F%E) : ereal_scope.
+Notation "\prod_ ( m <= i < n ) F" :=
+  (\big[*%E/1%:E]_(m <= i < n) F%E) : ereal_scope.
+Notation "\prod_ ( i | P ) F" :=
+  (\big[*%E/1%:E]_(i | P%B) F%E) : ereal_scope.
+Notation "\prod_ i F" :=
+  (\big[*%E/1%:E]_i F%E) : ereal_scope.
+Notation "\prod_ ( i : t | P ) F" :=
+  (\big[*%E/1%:E]_(i : t | P%B) F%E) (only parsing) : ereal_scope.
+Notation "\prod_ ( i : t ) F" :=
+  (\big[*%E/1%:E]_(i : t) F%E) (only parsing) : ereal_scope.
+Notation "\prod_ ( i < n | P ) F" :=
+  (\big[*%E/1%:E]_(i < n | P%B) F%E) : ereal_scope.
+Notation "\prod_ ( i < n ) F" :=
+  (\big[*%E/1%:E]_(i < n) F%E) : ereal_scope.
+Notation "\prod_ ( i 'in' A | P ) F" :=
+  (\big[*%E/1%:E]_(i in A | P%B) F%E) : ereal_scope.
+Notation "\prod_ ( i 'in' A ) F" :=
+  (\big[*%E/1%:E]_(i in A) F%E) : ereal_scope.
 
 
 Set Implicit Arguments.
@@ -17,7 +41,6 @@ Unset Printing Implicit Defensive.
 Import Num.Def Num.Theory GRing.Theory.
 Import Order.TTheory.
 Import numFieldTopology.Exports.
-Import MatrixFormula.
 
 Local Open Scope ring_scope.
 Local Open Scope classical_set_scope.
@@ -60,9 +83,22 @@ rewrite invr_lt0 -ln1 ltr_ln.
 by rewrite posrE ltr01.
 Qed.
 
+Definition choose (l : seq (R * bool)) :=
+  \big[maxr/0]_(i <- l | i.2) i.1.
+
+Lemma choose_prop_2 (l : seq (R * bool)) :
+  forall i, (i < size l)%nat ->
+       let p := nth (0, false) l i in
+       p.2 -> p.1 <= choose l.
+Proof.
+elim: l => //= a l ih i.
+elim: i => //= [_ aT|].
+  rewrite /choose big_cons aT /maxr.
+  by case: ifPn => //; lra.
+
 
 Definition algo (l : seq (R * bool)) :=
-  let t := \big[maxr/0]_(i <- l | i.2) i.1 in
+  let t := choose l in
   label t.
 
 Definition seq_of_RV := {RV P >-> R} ^nat.
@@ -75,7 +111,11 @@ Definition prob_of_X := P (I X).
 
 Hypothesis (PXeps : prob_of_X = epsilon%:E).
 
-Definition prob_of_seq := \prod_(i < n) P (I (X i)).
+Definition RV_prod (f g : T -> R) := fun i => (f i, g i).
+Notation "f '\times' g" := (RV_prod f g) (at level 10).
+
+
+Definition prob_of_seq := (\prod_(i < n) (P (I (Xn i))))%E.
 
 Definition test :=
   let row_vector : 'rV_n := \row_(j < n) X in
