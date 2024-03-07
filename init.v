@@ -91,10 +91,20 @@ Lemma choose_prop_2 (l : seq (R * bool)) :
        let p := nth (0, false) l i in
        p.2 -> p.1 <= choose l.
 Proof.
-elim: l => //= a l ih i.
+elim: l => //= a l ihl i. 
 elim: i => //= [_ aT|].
   rewrite /choose big_cons aT /maxr.
   by case: ifPn => //; lra.
+  move=> n0 ihi.
+
+  
+last_nth: forall [T : Type] (x0 x : T) (s : seq T), last x s = nth x0 (x :: s) (size s)
+nth_default: forall [T : Type] (x0 : T) [s : seq T] [n : nat], (size s <= n)%N -> nth x0 s n = x0
+nth_nil: forall [T : Type] (x0 : T) (n : nat), nth x0 [::] n = x0
+nth0: forall [T : Type] (x0 : T) (s : seq T), nth x0 s 0 = head x0 s
+nth_rcons_default:
+nth_last: forall [T : Type] (x0 : T) (s : seq T), nth x0 s (size s).-1 = last x0 s
+  forall [T : Type] (x0 : T) (s : seq T) (i : nat), nth x0 (rcons s x0) i = nth x0 s i
 
 
 Definition algo (l : seq (R * bool)) :=
@@ -121,12 +131,9 @@ Definition test :=
   let row_vector : 'rV_n := \row_(j < n) X in
     @seq_of_rV R _ row_vector.
 
-Definition x_leq_t (X : {RV P >-> R}) := [set x | X x <= t].
+Definition x_leq_t (X : {RV P >-> R}) := [set x | 0 > X x <= t]. (* \mu(0, t] *)
 Lemma prob_xt_leq_eps (training_exs : seq (R * bool)) : P (x_leq_t X) <= epsilon -> error (algo training_exs) <= epsilon.
 Lemma prob_xt_gt_eps : P (x <= t) > epsilon -> 1 - (1 - epsilon)^+n >= 1 - delta.
-
-
-
 
 Definition pac_learnable (epsilon delta : R) := (n%:R) >= ln delta / ln (1 - epsilon) -> P (error (algo (llist ((* seq of n length *)))) <= epsilon) >= 1 - delta.
 
