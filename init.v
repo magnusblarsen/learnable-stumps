@@ -56,12 +56,10 @@ Section decision_stump.
 Context d (T : measurableType d) {R : realType} (P : probability T R) (X : {RV P >-> R}) (t : R) (delta : R) (epsilon : R) (n : nat).
 Hypotheses (epsilon_01 : 0 < epsilon < 1) (delta_01 : 0 < delta < 1).
 
-  
-
 
 Definition label (d : R) := fun x => x <= d.
 
-Definition llist (l : seq R) := 
+Definition llist (l : seq R) :=
   map (fun x => (x, label t x)) l.
 
 Definition error (h: R -> bool) := P [set x : T | h (X x) != label t (X x)].
@@ -77,11 +75,12 @@ rewrite lnXn; last first.
   by rewrite subr_gt0 (andP epsilon_01).2.
 rewrite -ler_ndivrMr.
 - by rewrite invrK mulrC mulr_natr.
-rewrite invr_lt0 -ln1 ltr_ln. 
+rewrite invr_lt0 -ln1 ltr_ln.
 - by rewrite gtrBl (andP epsilon_01).1.
 - rewrite posrE subr_gt0 (andP epsilon_01).2 //.
 by rewrite posrE ltr01.
 Qed.
+
 
 Definition choose (l : seq (R * bool)) :=
   \big[maxr/0]_(i <- l | i.2) i.1.
@@ -91,21 +90,15 @@ Lemma choose_prop_2 (l : seq (R * bool)) :
        let p := nth (0, false) l i in
        p.2 -> p.1 <= choose l.
 Proof.
-elim: l => //= a l ihl i. 
+elim: l => //= a l ihl i.
 elim: i => //= [_ aT|].
   rewrite /choose big_cons aT /maxr.
   by case: ifPn => //; lra.
   move=> n0 ihi.
-
-  
-last_nth: forall [T : Type] (x0 x : T) (s : seq T), last x s = nth x0 (x :: s) (size s)
-nth_default: forall [T : Type] (x0 : T) [s : seq T] [n : nat], (size s <= n)%N -> nth x0 s n = x0
-nth_nil: forall [T : Type] (x0 : T) (n : nat), nth x0 [::] n = x0
-nth0: forall [T : Type] (x0 : T) (s : seq T), nth x0 s 0 = head x0 s
-nth_rcons_default:
-nth_last: forall [T : Type] (x0 : T) (s : seq T), nth x0 s (size s).-1 = last x0 s
-  forall [T : Type] (x0 : T) (s : seq T) (i : nat), nth x0 (rcons s x0) i = nth x0 s i
-
+  rewrite /choose big_cons.
+  case: ifPn.
+  rewrite le_max ihl.
+  by move=> _ _ _; rewrite orbT.
 
 Definition algo (l : seq (R * bool)) :=
   let t := choose l in
