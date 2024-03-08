@@ -95,10 +95,12 @@ elim: i => //= [_ aT|].
   rewrite /choose big_cons aT /maxr.
   by case: ifPn => //; lra.
   move=> n0 ihi; rewrite /choose big_cons.
-  case: ifPn.
-  rewrite le_max ihl.
-  by move=> _ _ _; rewrite orbT.
-  rewrite -ihl.
+  case: ifPn => h1 h2 h3.
+    by rewrite le_max ihl// orbT.
+    by rewrite ihl.
+Qed.
+
+
 
 
 Definition algo (l : seq (R * bool)) :=
