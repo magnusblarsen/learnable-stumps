@@ -54,7 +54,7 @@ End move_to_analysis.
 
 Section decision_stump.
 Context d (T : measurableType d) {R : realType} (P : probability T R) (X : {RV P >-> R}) (t : R) (delta : R) (epsilon : R) (n : nat).
-Hypotheses (epsilon_01 : 0 < epsilon < 1) (delta_01 : 0 < delta < 1).
+Hypotheses (epsilon_01 : 0 < epsilon < 1) (delta_01 : 0 < delta < 1) (tge0: 0 <= t).
 
 
 Definition label (d : R) := fun x => x <= d.
@@ -84,6 +84,20 @@ Qed.
 
 Definition choose (l : seq (R * bool)) :=
   \big[maxr/0]_(i <- l | i.2) i.1.
+
+Lemma choose_prop_1 (l : seq R) :
+  choose (llist l) <= t.
+Proof.
+  rewrite /choose /llist /label.
+  rewrite big_map.
+  elim: l.
+  by rewrite big_nil tge0.
+  move=> a l ih.
+  rewrite big_cons/=.
+  case: ifPn => //.
+  move=> a_le_t; rewrite /maxr.
+  by case: ifPn.
+Qed.
 
 Lemma choose_prop_2 (l : seq (R * bool)) :
   forall i, (i < size l)%nat ->
