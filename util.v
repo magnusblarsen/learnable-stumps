@@ -1,7 +1,22 @@
 (* Require Import decision_stump. *)
 
 (* Local Open Scope ereal_scope. *)
-Require Import kernel.
+From mathcomp Require Import all_ssreflect all_algebra finmap.
+From mathcomp Require Import mathcomp_extra boolp classical_sets functions.
+From mathcomp Require Import cardinality fsbigop .
+From mathcomp Require Import reals ereal signed topology normedtype sequences esum numfun.
+From HB Require Import structures.
+
+
+From mathcomp Require Import measure lebesgue_measure lebesgue_integral kernel.
+
+Set Implicit Arguments.
+Unset Strict Implicit.
+Unset Printing Implicit Defensive.
+Import Order.TTheory GRing.Theory Num.Def Num.Theory.
+
+Local Open Scope classical_set_scope.
+Local Open Scope ring_scope.
 
 Context d {T : measurableType d} {R : realType}.
 
@@ -139,3 +154,39 @@ exact/measurable_kernel.
 Qed.
 
 End giry_prop.
+
+Section measurable_seq.
+
+(* HB.factory Record isMeasurable (d : measure_display) T of Pointed T := {
+  measurable : set (set T) ;
+  measurable0 : measurable set0 ;
+  measurableC : forall A, measurable A -> measurable (~` A) ;
+  measurable_bigcup : forall F : (set T)^nat, (forall i, measurable (F i)) ->
+                                              measurable (\bigcup_i (F i))
+}. *)
+
+
+
+Notation munit := Datatypes_unit__canonical__measure_Measurable.
+
+Fixpoint iter_mprod (l : list {d & measurableType d})
+  : {d & measurableType d} :=
+  match l with
+  | [::] => existT measurableType _ munit
+  | h :: t => let t' := iter_mprod t in
+              existT _ _ [the measurableType (projT1 h, projT1 t').-prod of
+                            (projT2 h * projT2 t')%type]
+  end.
+
+Definition pT d (T : measurableType d) : {d & measurableType d} := (existT (measurableType) d T).
+
+Definition S d (T : measurableType d) n := iter_mprod (map (@pT _) (nseq n T)).
+
+Context d (T : measurableType d) (R: realType) (n : nat).
+Check (probability (projT2 (S T n)) R).
+
+
+End measurable_seq.
+
+
+
