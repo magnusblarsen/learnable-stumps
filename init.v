@@ -6,6 +6,7 @@ From mathcomp Require Import all_classical.
 From mathcomp Require Import reals ereal signed.
 From mathcomp Require Import topology derive normedtype sequences
  exp measure lebesgue_measure lebesgue_integral probability hoelder fintype.
+Require Import util.
 
 Notation "\prod_ ( i <- r | P ) F" :=
   (\big[*%E/1%:E]_(i <- r | P%B) F%E) : ereal_scope.
@@ -90,6 +91,7 @@ elim: i => //= [_ aT|].
     by rewrite ihl.
 Qed.
 
+Check (probability (projT2 (S T n)) R).
 
 Fixpoint sample n : probability (projT2 (S T n)) R :=
   match n with
@@ -101,7 +103,7 @@ Fixpoint sample n : probability (projT2 (S T n)) R :=
            bind
              P (fun x => ret (x :: l))
         )
-end.
+  end.
 
 Lemma test () :
   seq T measurable.
