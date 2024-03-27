@@ -169,7 +169,7 @@ Section measurable_seq.
 
 Notation munit := Datatypes_unit__canonical__measure_Measurable.
 
-Fixpoint iter_mprod (l : list {d & measurableType d})
+Fixpoint iter_mprod (l : seq {d & measurableType d})
   : {d & measurableType d} :=
   match l with
   | [::] => existT measurableType _ munit

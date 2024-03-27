@@ -5,7 +5,7 @@ From mathcomp Require Import lra.
 From mathcomp Require Import all_classical.
 From mathcomp Require Import reals ereal signed.
 From mathcomp Require Import topology derive normedtype sequences
- exp measure lebesgue_measure lebesgue_integral probability hoelder fintype.
+ exp measure lebesgue_measure lebesgue_integral probability hoelder fintype kernel.
 Require Import util.
 
 Notation "\prod_ ( i <- r | P ) F" :=
@@ -91,19 +91,44 @@ elim: i => //= [_ aT|].
     by rewrite ihl.
 Qed.
 
+Lemma always_succeed:
+  (P [set x | 0 <= X x <= t]%R <= epsilon%:E)%E ->
+  forall l, (error (label (choose (llist l))) <= epsilon%:E)%E.
+Proof.
+move=> h l.
+rewrite /error.
+apply: (le_trans _ h).
+apply: le_measure. admit. admit.
+move=> x /=.
+have h2 := choose_prop_1 l.
+rewrite /label.
+Admitted.
+
 Check (probability (projT2 (S T n)) R).
 
-Fixpoint sample n : probability (projT2 (S T n)) R :=
+Program Fixpoint sample n : probability (projT2 (S T n)) R :=
   match n with
-  | 0 => ret nil
+  | 0 => _
   | m.+1 =>
-      bind
-        (sample m)
-        (fun l =>
-           bind
-             P (fun x => ret (x :: l))
-        )
+      (* bind (bind P (sample m)) *)
+      (*      (kdirac cons) *)
+      bind P _
+        (* (fun x => *)
+        (*    bind (sample m) *)
+        (*      (fun l => ret (x :: l))) *)
+      (* bind *)
+      (*   (sample m) *)
+      (*   (fun l => *)
+      (*      bind *)
+      (*        P (fun x => ret (x :: l)) *)
+      (*   ) *)
   end.
+Next Obligation.
+move=> n0 _.
+apply: ret.
+apply (existT _).
+
+(probability (projT2 (S T n)) R)
 
 Lemma test () :
   seq T measurable.
