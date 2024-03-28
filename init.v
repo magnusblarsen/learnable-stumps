@@ -102,9 +102,13 @@ apply: le_measure. admit. admit.
 move=> x /=.
 have h2 := choose_prop_1 l.
 rewrite /label.
-Admitted.
+rewrite negb_eqb.
+case: addbP.
+case: negP.
+move=> A B C.
+rewrite -B Bool.andb_true_r. admit.
+rewrite notE. admit.
 
-Check (probability (projT2 (S T n)) R).
 
 Program Fixpoint sample n : probability (projT2 (S T n)) R :=
   match n with
