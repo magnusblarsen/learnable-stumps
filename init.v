@@ -91,6 +91,26 @@ elim: i => //= [_ aT|].
     by rewrite ihl.
 Qed.
 
+(*
+Lemma negE (b : bool) : ~~ b = (~ b) :> Prop.
+Proof. by rewrite propeqE; split;  move/negP. Qed.
+
+Lemma orE (b1 b2 : bool) : (b1 || b2) = (b1 \/ b2) :> Prop.
+Proof. by rewrite propeqE; split; move/orP. Qed.
+
+Lemma in_pred_setE (TT : Type) (A : {pred TT}) (x : TT) :
+  (x \in [set x | A x]) = A x.
+Proof. by apply/idP/idP; rewrite inE /=. Qed.
+*)
+
+Lemma set_label_neqE x y :
+  [set z | label x z != label y z] = `]minr x y, maxr x y].
+Proof.
+apply: eq_set=> z.
+rewrite !in_itv /= gt_min le_max !ltNge /label.
+by case: lerP=> _; case: lerP.
+Qed.
+
 Lemma always_succeed:
   (P [set x | 0 <= X x <= t]%R <= epsilon%:E)%E ->
   forall l, (error (label (choose (llist l))) <= epsilon%:E)%E.
@@ -98,17 +118,28 @@ Proof.
 move=> h l.
 rewrite /error.
 apply: (le_trans _ h).
-apply: le_measure. admit. admit.
+apply: le_measure.
+- rewrite inE -[Y in d.-measurable Y]setTI.
+  set F := fun y => label (choose (llist l)) y != label t y.
+  rewrite (_ : [set _ | _] = X@^-1` [set y | F y]) //.
+  apply: measurable_funP=> //.
+  by rewrite /F set_label_neqE.
+- rewrite inE -[Y in d.-measurable Y]setTI.
+  rewrite (_ : [set _ | _] = X@^-1` [set y | 0 <= y <= t]) //.
+  apply: measurable_funP=> //.
+  by rewrite -set_itvcc.
 move=> x /=.
 have h2 := choose_prop_1 l.
 rewrite /label.
 rewrite negb_eqb.
-case: addbP.
+case: addbP=> //.
 case: negP.
-move=> A B C.
-rewrite -B Bool.andb_true_r. admit.
-rewrite notE. admit.
-
+  move=> /[swap] <- /[swap] _ /negP.
+  rewrite -ltNge ?num_real // andbT => A.
+  apply/ltW/(le_lt_trans _ A).
+  exact: bigmax_ge_id.
+by move/contrapT /le_trans => /(_ _ h2) ->.
+Qed.
 
 Program Fixpoint sample n : probability (projT2 (S T n)) R :=
   match n with
