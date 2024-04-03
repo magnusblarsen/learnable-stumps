@@ -103,6 +103,11 @@ Lemma in_pred_setE (TT : Type) (A : {pred TT}) (x : TT) :
 Proof. by apply/idP/idP; rewrite inE /=. Qed.
 *)
 
+Lemma test x y :
+  [set z | label x z != label y z] = `[minr x y, maxr x y[.
+Proof.
+Admitted.
+
 Lemma set_label_neqE x y :
   [set z | label x z != label y z] = `]minr x y, maxr x y].
 Proof.
@@ -161,7 +166,8 @@ Program Fixpoint sample n : probability (projT2 (S T n)) R :=
 Next Obligation.
 move=> n0 _.
 apply: ret.
-apply (existT _).
+change unit.
+exact: tt.
 
 (probability (projT2 (S T n)) R)
 
@@ -174,21 +180,6 @@ Definition algo (l : seq (R * bool)) :=
   let t := choose l in
   label t.
 
-Definition seq_of_RV := {RV P >-> R} ^nat.
-Definition Xn : seq_of_RV := [sequence X]_n.
-
-Variable t0 : R.
-Definition I (X : {RV P >-> R}) := [set x | t0 <= X x <= t ].
-
-Definition prob_of_X := P (I X).
-
-Hypothesis (PXeps : prob_of_X = epsilon%:E).
-
-Definition RV_prod (f g : T -> R) := fun i => (f i, g i).
-Notation "f '\times' g" := (RV_prod f g) (at level 10).
-
-
-Definition prob_of_seq := (\prod_(i < n) (P (I (Xn i))))%E.
 
 
 Definition x_leq_t (X : {RV P >-> R}) := [set x | 0 > X x <= t]. (* \mu(0, t] *)
@@ -213,4 +204,20 @@ Qed.
 
 Definition pac_learnable (epsilon delta : R) := (n%:R) >= ln delta / ln (1 - epsilon) -> P (error (algo (llist ((* seq of n length *)))) <= epsilon) >= 1 - delta.
 
+
+Variable t0 : R.
+Definition I (X : {RV P >-> R}) := [set x | t0 <= X x <= t ].
+
+Definition seq_of_RV := {RV P >-> R} ^nat.
+Definition Xn : seq_of_RV := [sequence X]_n.
+
+Definition prob_of_X := P (I X).
+
+Hypothesis (PXeps : prob_of_X = epsilon%:E).
+
+Definition RV_prod (f g : T -> R) := fun i => (f i, g i).
+Notation "f '\times' g" := (RV_prod f g) (at level 10).
+
+
+Definition prob_of_seq := (\prod_(i < n) (P (I (Xn i))))%E.
 End decision_stump.
