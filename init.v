@@ -169,16 +169,13 @@ apply: ret.
 change unit.
 exact: tt.
 
-(probability (projT2 (S T n)) R)
-
 Lemma test () :
   seq T measurable.
 
-
-
 Definition algo (l : seq (R * bool)) :=
-  let t := choose l in
-  label t.
+  let t_hat := choose l in
+  label t_hat.
+
 
 
 
