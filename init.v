@@ -146,8 +146,28 @@ case: negP.
 by move/contrapT /le_trans => /(_ _ h2) ->.
 Qed.
 
-Lemma miss_prob:
-  P [set x | ]
+Definition complexity := ln delta / ln (1 - epsilon).
+Lemma complexity_enough: (n%:R) >= complexity -> 1 - (1 - epsilon)^+n >= 1 - delta.
+Proof.
+  rewrite /complexity.
+
+
+Lemma n_value : 1 - (1 - epsilon)^+n >= 1 - delta -> (n%:R) >= ln delta / ln (1 - epsilon).
+Proof.
+  rewrite -opprB opprD opprK -lerBrDr addrAC subrr add0r lerNr opprK.
+  rewrite -ler_ln; last 2 first.
+  - by rewrite posrE exprn_gt0 // subr_gt0 (andP epsilon_01).2.
+  - by rewrite posrE (andP delta_01).1.
+    rewrite lnXn; last first.
+    by rewrite subr_gt0 (andP epsilon_01).2.
+    rewrite -ler_ndivrMr.
+  - by rewrite invrK mulrC mulr_natr.
+    rewrite invr_lt0 -ln1 ltr_ln.
+  - by rewrite gtrBl (andP epsilon_01).1.
+  - rewrite posrE subr_gt0 (andP epsilon_01).2 //.
+    by rewrite posrE ltr01.
+Qed.
+
 
 
 
@@ -185,22 +205,6 @@ Definition algo (l : seq (R * bool)) :=
 Definition x_leq_t (X : {RV P >-> R}) := [set x | 0 > X x <= t]. (* \mu(0, t] *)
 Lemma prob_xt_leq_eps (training_exs : seq (R * bool)) : P (x_leq_t X) <= epsilon -> error (algo training_exs) <= epsilon.
 Lemma prob_xt_gt_eps : P (x <= t) > epsilon -> 1 - (1 - epsilon)^+n >= 1 - delta.
-
-Lemma n_value : 1 - (1 - epsilon)^+n >= 1 - delta -> (n%:R) >= ln delta / ln (1 - epsilon).
-Proof.
-  rewrite -opprB opprD opprK -lerBrDr addrAC subrr add0r lerNr opprK.
-  rewrite -ler_ln; last 2 first.
-  - by rewrite posrE exprn_gt0 // subr_gt0 (andP epsilon_01).2.
-  - by rewrite posrE (andP delta_01).1.
-    rewrite lnXn; last first.
-    by rewrite subr_gt0 (andP epsilon_01).2.
-    rewrite -ler_ndivrMr.
-  - by rewrite invrK mulrC mulr_natr.
-    rewrite invr_lt0 -ln1 ltr_ln.
-  - by rewrite gtrBl (andP epsilon_01).1.
-  - rewrite posrE subr_gt0 (andP epsilon_01).2 //.
-    by rewrite posrE ltr01.
-Qed.
 
 Definition pac_learnable (epsilon delta : R) := (n%:R) >= ln delta / ln (1 - epsilon) -> P (error (algo (llist ((* seq of n length *)))) <= epsilon) >= 1 - delta.
 
