@@ -48,8 +48,8 @@ Local Open Scope ring_scope.
 Local Open Scope classical_set_scope.
 
 Section decision_stump.
-Context d (T : measurableType d) {R : realType} (P : probability T R) (X : {RV P >-> R}) (t : R) (delta : R) (epsilon : R) (n : nat).
-Hypotheses (epsilon_01 : 0 < epsilon < 1) (delta_01 : 0 < delta < 1) (tge0: 0 <= t).
+Context d (T : measurableType d) {R : realType} (P : probability T R) (X : {RV P >-> R}) (t : R) (delta epsilon theta : R) (n : nat).
+Hypotheses (epsilon_01 : 0 < epsilon < 1) (delta_01 : 0 < delta < 1) (tge0: 0 <= t) (theta_eps : P [set x | X x \in `[theta, t]] = epsilon%:E).
 
 
 Definition label (d : R) := fun x => x <= d.
@@ -146,9 +146,14 @@ case: negP.
 by move/contrapT /le_trans => /(_ _ h2) ->.
 Qed.
 
+Lemma miss_prob:
+  P [set x | ]
+
+
+
 Program Fixpoint sample n : probability (projT2 (S T n)) R :=
   match n with
-  | 0 => _
+  | 0 => ret (d:=projT1 (S T 0)) tt
   | m.+1 =>
       (* bind (bind P (sample m)) *)
       (*      (kdirac cons) *)
@@ -164,13 +169,11 @@ Program Fixpoint sample n : probability (projT2 (S T n)) R :=
       (*   ) *)
   end.
 Next Obligation.
-move=> n0 _.
-apply: ret.
-change unit.
-exact: tt.
+Show Proof.
 
-Lemma test () :
-  seq T measurable.
+(* Lemma test () :
+  seq T measurable.*)
+
 
 Definition algo (l : seq (R * bool)) :=
   let t_hat := choose l in
@@ -201,20 +204,4 @@ Qed.
 
 Definition pac_learnable (epsilon delta : R) := (n%:R) >= ln delta / ln (1 - epsilon) -> P (error (algo (llist ((* seq of n length *)))) <= epsilon) >= 1 - delta.
 
-
-Variable t0 : R.
-Definition I (X : {RV P >-> R}) := [set x | t0 <= X x <= t ].
-
-Definition seq_of_RV := {RV P >-> R} ^nat.
-Definition Xn : seq_of_RV := [sequence X]_n.
-
-Definition prob_of_X := P (I X).
-
-Hypothesis (PXeps : prob_of_X = epsilon%:E).
-
-Definition RV_prod (f g : T -> R) := fun i => (f i, g i).
-Notation "f '\times' g" := (RV_prod f g) (at level 10).
-
-
-Definition prob_of_seq := (\prod_(i < n) (P (I (Xn i))))%E.
 End decision_stump.
