@@ -51,6 +51,11 @@ Section decision_stump.
 Context d (T : measurableType d) {R : realType} (P : probability T R) (X : {RV P >-> R}) (t : R) (delta epsilon theta : R) (n : nat).
 Hypotheses (epsilon_01 : 0 < epsilon < 1) (delta_01 : 0 < delta < 1) (tge0: 0 <= t) (theta_eps : P [set x | X x \in `[theta, t]] = epsilon%:E).
 
+Definition complexity := ln delta / ln (1 - epsilon) - 1.
+Lemma complexity_enough : n%:R > complexity -> ((1-epsilon)`^(n.+1%:R)) <= delta.
+Proof.
+rewrite/complexity ltrBlDl nat1r.
+Admitted.
 
 Definition label (d : R) := fun x => x <= d.
 
@@ -146,11 +151,52 @@ case: negP.
 by move/contrapT /le_trans => /(_ _ h2) ->.
 Qed.
 
-Definition complexity := ln delta / ln (1 - epsilon).
-Lemma complexity_enough: (n%:R) >= complexity -> 1 - (1 - epsilon)^+n >= 1 - delta.
-Proof.
-  rewrite /complexity.
+Obligation Tactic := idtac.
 
+(* Definition sample0 n (p : probability T R) x (l :  := ret (x :: l). *)
+
+(* Definition sample1 n (p : probability (projT2 (S T n)) R) x := *)
+(*   bind p sample0. *)
+
+Local Open Scope ereal_scope.
+Fixpoint sample n : measure (projT2 (S T n)) R :=
+  match n with
+  | 0 => ret (d:=projT1 (S T 0)) tt
+  | m.+1 => P \x^ (sample m)
+  end.
+
+
+Definition mybind (A : measurableType d) B (mu : {measure set A -> \bar R}) (f : A -> set B -> \bar R) : (set B -> \bar R) := \int[mu]_a f a.
+
+Fixpoint sample n : (set (projT2 (S T n)) -> \bar R) :=
+  match n with
+  | 0 => ret (d:=projT1 (S T 0)) tt
+  | m.+1 =>
+      mybind
+        P
+        (fun x =>
+           mybind
+             (@sample m)
+             (fun l => ret (x, l)))
+
+
+        (* (sample m) *)
+        (* (fun l => *)
+        (*    bind *)
+        (*      P (fun x => ret (x, l))) *)
+  end.
+
+
+
+Definition algo (l : seq (R * bool)) :=
+  let t := choose l in
+  label t.
+
+
+
+Definition x_leq_t (X : {RV P >-> R}) := [set x | 0 > X x <= t]. (* \mu(0, t] *)
+Lemma prob_xt_leq_eps (training_exs : seq (R * bool)) : P (x_leq_t X) <= epsilon -> error (algo training_exs) <= epsilon.
+Lemma prob_xt_gt_eps : P (x <= t) > epsilon -> 1 - (1 - epsilon)^+n >= 1 - delta.
 
 Lemma n_value : 1 - (1 - epsilon)^+n >= 1 - delta -> (n%:R) >= ln delta / ln (1 - epsilon).
 Proof.
