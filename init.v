@@ -47,15 +47,11 @@ Import numFieldTopology.Exports.
 Local Open Scope ring_scope.
 Local Open Scope classical_set_scope.
 
+
+
 Section decision_stump.
 Context d (T : measurableType d) {R : realType} (P : probability T R) (X : {RV P >-> R}) (t : R) (delta epsilon theta : R) (n : nat).
 Hypotheses (epsilon_01 : 0 < epsilon < 1) (delta_01 : 0 < delta < 1) (tge0: 0 <= t) (theta_eps : P [set x | X x \in `[theta, t]] = epsilon%:E).
-
-Definition complexity := ln delta / ln (1 - epsilon) - 1.
-Lemma complexity_enough : n%:R > complexity -> ((1-epsilon)`^(n.+1%:R)) <= delta.
-Proof.
-rewrite/complexity ltrBlDl nat1r.
-Admitted.
 
 Definition label (d : R) := fun x => x <= d.
 
@@ -165,6 +161,11 @@ Fixpoint sample n : measure (projT2 (S T n)) R :=
   | m.+1 => P \x^ (sample m)
   end.
 
+Definition algo (l : seq (R * bool)) :=
+  let t := choose l in
+  label t.
+Definition pac_learnable (epsilon delta : R) (l : n.-tuple T):= (n%:R >= ln delta / ln (1 - epsilon) -> P (error (algo (llist l)) <= epsilon) >= 1 - delta)%R.
+
 
 Definition mybind (A : measurableType d) B (mu : {measure set A -> \bar R}) (f : A -> set B -> \bar R) : (set B -> \bar R) := \int[mu]_a f a.
 
@@ -188,9 +189,6 @@ Fixpoint sample n : (set (projT2 (S T n)) -> \bar R) :=
 
 
 
-Definition algo (l : seq (R * bool)) :=
-  let t := choose l in
-  label t.
 
 
 
@@ -214,8 +212,11 @@ Proof.
     by rewrite posrE ltr01.
 Qed.
 
-
-
+Definition complexity := ln delta / ln (1 - epsilon) - 1.
+Lemma complexity_enough : n%:R > complexity -> ((1-epsilon)`^(n.+1%:R)) <= delta.
+Proof.
+rewrite/complexity ltrBlDl nat1r.
+Admitted.
 
 Program Fixpoint sample n : probability (projT2 (S T n)) R :=
   match n with
@@ -252,6 +253,5 @@ Definition x_leq_t (X : {RV P >-> R}) := [set x | 0 > X x <= t]. (* \mu(0, t] *)
 Lemma prob_xt_leq_eps (training_exs : seq (R * bool)) : P (x_leq_t X) <= epsilon -> error (algo training_exs) <= epsilon.
 Lemma prob_xt_gt_eps : P (x <= t) > epsilon -> 1 - (1 - epsilon)^+n >= 1 - delta.
 
-Definition pac_learnable (epsilon delta : R) := (n%:R) >= ln delta / ln (1 - epsilon) -> P (error (algo (llist ((* seq of n length *)))) <= epsilon) >= 1 - delta.
 
 End decision_stump.
