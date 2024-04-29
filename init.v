@@ -154,6 +154,52 @@ Obligation Tactic := idtac.
 (* Definition sample1 n (p : probability (projT2 (S T n)) R) x := *)
 (*   bind p sample0. *)
 
+Lemma n_value : 1 - (1 - epsilon)^+n >= 1 - delta -> (n%:R) >= ln delta / ln (1 - epsilon).
+Proof.
+  rewrite -opprB opprD opprK -lerBrDr addrAC subrr add0r lerNr opprK.
+  rewrite -ler_ln; last 2 first.
+  - by rewrite posrE exprn_gt0 // subr_gt0 (andP epsilon_01).2.
+  - by rewrite posrE (andP delta_01).1.
+    rewrite lnXn; last first.
+    by rewrite subr_gt0 (andP epsilon_01).2.
+    rewrite -ler_ndivrMr.
+  - by rewrite invrK mulrC mulr_natr.
+    rewrite invr_lt0 -ln1 ltr_ln.
+  - by rewrite gtrBl (andP epsilon_01).1.
+  - rewrite posrE subr_gt0 (andP epsilon_01).2 //.
+    by rewrite posrE ltr01.
+Qed.
+
+Definition complexity := ln delta / ln (1 - epsilon) - 1.
+Lemma complexity_enough : n%:R >= complexity -> ((1-epsilon) ^+ (n.+1)) <= delta.
+Proof.
+move: epsilon_01 delta_01 => /andP[? ?] /andP[? ?].
+rewrite/complexity lerBlDl nat1r.
+rewrite ler_ndivrMr; last first.
+  rewrite -ln1 ltr_ln ?posrE; lra.
+rewrite mulrC.
+rewrite mulr_natr.
+rewrite -lnXn; last lra.
+rewrite ler_ln// posrE ?exprn_gt0//; lra.
+Qed.
+
+Lemma n_value2 : (n%:R) >= ln delta / ln (1 - epsilon) -> 1 - (1 - epsilon)^+n >= 1 - delta.
+Proof.
+  rewrite -opprB opprD opprK -lerBrDr addrAC subrr add0r lerNr opprK.
+  rewrite -ler_ln; last 2 first.
+  - by rewrite posrE exprn_gt0 // subr_gt0 (andP epsilon_01).2.
+  - by rewrite posrE (andP delta_01).1.
+    rewrite lnXn; last first.
+    by rewrite subr_gt0 (andP epsilon_01).2.
+    rewrite -ler_ndivrMr.
+  - by rewrite invrK mulrC mulr_natr.
+    rewrite invr_lt0 -ln1 ltr_ln.
+  - by rewrite gtrBl (andP epsilon_01).1.
+  - rewrite posrE subr_gt0 (andP epsilon_01).2 //.
+    by rewrite posrE ltr01.
+Qed.
+
+
 Local Open Scope ereal_scope.
 Fixpoint sample n : measure (projT2 (S T n)) R :=
   match n with
@@ -195,28 +241,6 @@ Fixpoint sample n : (set (projT2 (S T n)) -> \bar R) :=
 Definition x_leq_t (X : {RV P >-> R}) := [set x | 0 > X x <= t]. (* \mu(0, t] *)
 Lemma prob_xt_leq_eps (training_exs : seq (R * bool)) : P (x_leq_t X) <= epsilon -> error (algo training_exs) <= epsilon.
 Lemma prob_xt_gt_eps : P (x <= t) > epsilon -> 1 - (1 - epsilon)^+n >= 1 - delta.
-
-Lemma n_value : 1 - (1 - epsilon)^+n >= 1 - delta -> (n%:R) >= ln delta / ln (1 - epsilon).
-Proof.
-  rewrite -opprB opprD opprK -lerBrDr addrAC subrr add0r lerNr opprK.
-  rewrite -ler_ln; last 2 first.
-  - by rewrite posrE exprn_gt0 // subr_gt0 (andP epsilon_01).2.
-  - by rewrite posrE (andP delta_01).1.
-    rewrite lnXn; last first.
-    by rewrite subr_gt0 (andP epsilon_01).2.
-    rewrite -ler_ndivrMr.
-  - by rewrite invrK mulrC mulr_natr.
-    rewrite invr_lt0 -ln1 ltr_ln.
-  - by rewrite gtrBl (andP epsilon_01).1.
-  - rewrite posrE subr_gt0 (andP epsilon_01).2 //.
-    by rewrite posrE ltr01.
-Qed.
-
-Definition complexity := ln delta / ln (1 - epsilon) - 1.
-Lemma complexity_enough : n%:R > complexity -> ((1-epsilon)`^(n.+1%:R)) <= delta.
-Proof.
-rewrite/complexity ltrBlDl nat1r.
-Admitted.
 
 Program Fixpoint sample n : probability (projT2 (S T n)) R :=
   match n with
