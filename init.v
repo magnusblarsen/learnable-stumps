@@ -63,6 +63,10 @@ Definition error (h: R -> bool) := P [set x : T | h (X x) != label t (X x)].
 Definition choose (l : seq (R * bool)) :=
   \big[maxr/0]_(i <- l | i.2) i.1.
 
+Definition algo (l : seq (R * bool)) :=
+  let t := choose l in
+  label t.
+
 Lemma choose_prop_1 (l : seq R) :
   choose (llist l) <= t.
 Proof.
@@ -92,22 +96,6 @@ elim: i => //= [_ aT|].
     by rewrite ihl.
 Qed.
 
-(*
-Lemma negE (b : bool) : ~~ b = (~ b) :> Prop.
-Proof. by rewrite propeqE; split;  move/negP. Qed.
-
-Lemma orE (b1 b2 : bool) : (b1 || b2) = (b1 \/ b2) :> Prop.
-Proof. by rewrite propeqE; split; move/orP. Qed.
-
-Lemma in_pred_setE (TT : Type) (A : {pred TT}) (x : TT) :
-  (x \in [set x | A x]) = A x.
-Proof. by apply/idP/idP; rewrite inE /=. Qed.
-*)
-
-Lemma test x y :
-  [set z | label x z != label y z] = `[minr x y, maxr x y[.
-Proof.
-Admitted.
 
 Lemma set_label_neqE x y :
   [set z | label x z != label y z] = `]minr x y, maxr x y].
@@ -147,6 +135,9 @@ case: negP.
 by move/contrapT /le_trans => /(_ _ h2) ->.
 Qed.
 
+
+
+
 Obligation Tactic := idtac.
 
 (* Definition sample0 n (p : probability T R) x (l :  := ret (x :: l). *)
@@ -183,22 +174,10 @@ rewrite -lnXn; last lra.
 rewrite ler_ln// posrE ?exprn_gt0//; lra.
 Qed.
 
-Lemma n_value2 : (n%:R) >= ln delta / ln (1 - epsilon) -> 1 - (1 - epsilon)^+n >= 1 - delta.
-Proof.
-  rewrite -opprB opprD opprK -lerBrDr addrAC subrr add0r lerNr opprK.
-  rewrite -ler_ln; last 2 first.
-  - by rewrite posrE exprn_gt0 // subr_gt0 (andP epsilon_01).2.
-  - by rewrite posrE (andP delta_01).1.
-    rewrite lnXn; last first.
-    by rewrite subr_gt0 (andP epsilon_01).2.
-    rewrite -ler_ndivrMr.
-  - by rewrite invrK mulrC mulr_natr.
-    rewrite invr_lt0 -ln1 ltr_ln.
-  - by rewrite gtrBl (andP epsilon_01).1.
-  - rewrite posrE subr_gt0 (andP epsilon_01).2 //.
-    by rewrite posrE ltr01.
-Qed.
 
+
+
+Definition mybind (A : measurableType d) B (mu : {measure set A -> \bar R}) (f : A -> set B -> \bar R) : (set B -> \bar R) := \int[mu]_a f a.
 
 Local Open Scope ereal_scope.
 Fixpoint sample n : measure (projT2 (S T n)) R :=
@@ -206,14 +185,6 @@ Fixpoint sample n : measure (projT2 (S T n)) R :=
   | 0 => ret (d:=projT1 (S T 0)) tt
   | m.+1 => P \x^ (sample m)
   end.
-
-Definition algo (l : seq (R * bool)) :=
-  let t := choose l in
-  label t.
-Definition pac_learnable (epsilon delta : R) (l : n.-tuple T):= (n%:R >= ln delta / ln (1 - epsilon) -> P (error (algo (llist l)) <= epsilon) >= 1 - delta)%R.
-
-
-Definition mybind (A : measurableType d) B (mu : {measure set A -> \bar R}) (f : A -> set B -> \bar R) : (set B -> \bar R) := \int[mu]_a f a.
 
 Fixpoint sample n : (set (projT2 (S T n)) -> \bar R) :=
   match n with
@@ -232,15 +203,6 @@ Fixpoint sample n : (set (projT2 (S T n)) -> \bar R) :=
         (*    bind *)
         (*      P (fun x => ret (x, l))) *)
   end.
-
-
-
-
-
-
-Definition x_leq_t (X : {RV P >-> R}) := [set x | 0 > X x <= t]. (* \mu(0, t] *)
-Lemma prob_xt_leq_eps (training_exs : seq (R * bool)) : P (x_leq_t X) <= epsilon -> error (algo training_exs) <= epsilon.
-Lemma prob_xt_gt_eps : P (x <= t) > epsilon -> 1 - (1 - epsilon)^+n >= 1 - delta.
 
 Program Fixpoint sample n : probability (projT2 (S T n)) R :=
   match n with
@@ -265,17 +227,18 @@ Show Proof.
 (* Lemma test () :
   seq T measurable.*)
 
-
-Definition algo (l : seq (R * bool)) :=
-  let t_hat := choose l in
-  label t_hat.
+Definition pac_learnable (epsilon delta : R) (l : n.-tuple T):= (n%:R >= ln delta / ln (1 - epsilon) -> P (error (algo (llist l)) <= epsilon) >= 1 - delta)%R.
 
 
+Lemma miss_prob:
+  P [set x | X x \in `[theta, t]] >= epsilon ->
+  P [set x | if label t x then x else 0 < theta] <= 1 - epsilon.
 
-
-Definition x_leq_t (X : {RV P >-> R}) := [set x | 0 > X x <= t]. (* \mu(0, t] *)
-Lemma prob_xt_leq_eps (training_exs : seq (R * bool)) : P (x_leq_t X) <= epsilon -> error (algo training_exs) <= epsilon.
-Lemma prob_xt_gt_eps : P (x <= t) > epsilon -> 1 - (1 - epsilon)^+n >= 1 - delta.
+Lemma miss_prob:
+  P (`[theta, t]) >= epsilon ->
+  P [set x : T | forall a b,
+        let (a,b) = label target x in
+        (if b then a else 0) < theta] <= 1 - epsilon.
 
 
 End decision_stump.
